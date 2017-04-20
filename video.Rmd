@@ -1,0 +1,148 @@
+---
+title: "video"
+author: "sh3559"
+date: "November 12, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+setwd("C:/Users/sh355/Desktop/shiny")
+videogamesales <- read.csv("vgsales.csv")
+```
+```{r}
+library(ggplot2)
+library(dplyr)
+library(DT)
+library(tidyr)
+library(wesanderson)
+```
+```{r}
+videogamesales <- videogamesales[!(videogamesales$Year %in% c("N/A", "2017", "2020")),]
+```
+```{r}
+videogamesales <- videogamesales %>% gather(Region, Revenue, 7:10)
+```
+```{r}
+videogamesales$Region <- factor(videogamesales$Region)
+```
+```{r}
+mycolors <- c("#771C19", "#AA3929", "#8E9CA3", "#556670", "#000000", "#E25033", "#F27314", "#F8A31B", "#E2C59F", "#B6C5CC")
+```
+```{r}
+# Function to define the theme use across all the plots in the file.
+mytheme_1 <- function() {
+  
+ return(theme(axis.text.x = element_text(angle = 90, size = 10, vjust = 0.4), plot.title = element_text(size = 15, vjust = 2),axis.title.x = element_text(size = 12, vjust = -0.35)))
+  
+}
+mytheme_2 <- function() {
+  
+ return(theme(axis.text.x = element_text(size = 10, vjust = 0.4), plot.title = element_text(size = 15, vjust = 2),axis.title.x = element_text(size = 12, vjust = -0.35)))
+  
+}
+```
+```{r}
+ggplot(videogamesales, aes(Year)) + 
+  geom_bar(fill = "blue") +
+  mytheme_1() +
+  ggtitle("Video Game Releases by Year")
+```
+
+```{r}
+revenue_by_year <- videogamesales %>% 
+                    group_by(Year) %>%
+                      summarize(Revenue = sum(Global_Sales))
+```
+```{r}
+ggplot(revenue_by_year, aes(Year, Revenue)) + 
+  geom_bar(fill = "maroon", stat = "identity") +
+  mytheme_1() +
+  ggtitle("Video Game Revenue by Year")
+```
+```{r}
+publisher_year <- videogamesales %>% 
+         group_by(Year, Publisher) %>% 
+         summarize(Revenue = sum(Global_Sales))
+```
+```{r}
+platform_year <- videogamesales %>% 
+         group_by(Year, Platform) %>% 
+         summarize(Revenue = sum(Global_Sales))
+```
+```{r}
+publisher_platform<- videogamesales %>% 
+         group_by(Publisher, Platform) %>% 
+         summarize(Revenue = sum(Global_Sales))
+```
+```{r}
+video<-videogamesales[videogamesales$Publisher==c("Activision","Electronic Arts","Konami Digital Entertainment","Namco Bandai Games","Nintendo","Sega","Sony Computer Entertainment","Take-Two Interactive","THQ","Ubisoft"),]
+```
+```{r}
+publisher_platform2<- video %>% 
+         group_by(Platform, Publisher) %>% 
+         summarize(Revenue = sum(Global_Sales))
+```
+
+```{r}
+video2<-video[video$Platform %in% c("PS2",
+"X360",
+"PS3",
+"Wii",
+"DS",
+"PS",
+"GBA",
+"PSP",
+"PS4",
+"PC"
+),]
+```
+```{r}
+publisher_platform3<- video2 %>% 
+         group_by(Platform, Publisher) %>% 
+         summarize(Revenue = sum(Global_Sales))
+```
+```{r}
+publisher_platform4<- video2 %>% 
+         group_by(Publisher,Platform) %>% 
+         summarize(Revenue = sum(Global_Sales))
+```
+```{r}
+py<-platform_year[platform_year$Platform %in% c("PS2",
+"X360",
+"PS3",
+"Wii",
+"DS",
+"PS",
+"GBA",
+"PSP",
+"PS4",
+"PC"
+),]
+```
+```{r}
+year_platform_publisher<- video2 %>% 
+         group_by(Year, Platform, Publisher) %>% 
+         summarize(Revenue = sum(Global_Sales))
+```
+```{r}
+platform_year<-as.data.frame(platform_year)
+ps<-subset(videogamesales, Platform %in% c("PS","PS2","PS3","PS4"))
+```
+```{r}
+ps1<-ps %>% group_by(Year) %>% summarize(Revenue = sum(Global_Sales))
+```
+```{r}
+all<-videogamesales %>% group_by(Year) %>% summarize(Revenue = sum(Global_Sales))
+```
+```{r}
+psvec<-as.numeric(unlist(c(rep(0,14), ps1[,2])))
+```
+```{r}
+ratio<-psvec/all$Revenue
+```
+```{r}
+ggplot()+geom_point(aes(x=1980:2016, y=ratio*100))+geom_bar(aes(x=1980:2016, y=ratio*100), stat="identity", fill="grey")+labs(x="Year", y="Ratio")
+```
